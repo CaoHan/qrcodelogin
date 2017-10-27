@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <script  src="http://libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>
+        <title>这个一个二维码登录页Demo</title>
+    </head>
+    <body>
+        <h4>
+            这个一个二维码登录页Demo
+        </h4>
+        <h5>
+            用APP扫描下方二维码模拟登录
+        </h5>
+        <img id="qrcodeimg" />
+    </body>
+
+    <script>
+        $.ajax({
+            type: "GET",
+            url: "getqruuid.php",
+            data: {},
+            success: function (result) {
+                var data = JSON.parse(result);
+                if (data.code == 1) {
+                    //显示到网页上
+                    $("#qrcodeimg").attr('src', 'http://qr.topscan.com/api.php?text=' + data.data);
+                    //轮询 查询该qruuid的状态 直到登录成功或者过期(过期这里没判断，留给大家)
+                    var interval1= setInterval(function () {
+                        $.ajax({
+                            type: "GET",
+                            url: "checkqruuid.php",
+                            data: {'qruuid': data.data},
+                            success: function (result) {
+                                var data = JSON.parse(result);
+                                if (data.code == 1) {
+                                    alert('扫码成功（即登录成功），进行跳转.....');
+                                    //停止轮询
+                                    clearInterval(interval1);
+                                    //TODO 拿到需要的信息 然后跳转什么的
+                                }
+                            }
+                        });
+                    }, 1000);//1秒钟  频率按需求
+                }
+            }
+        });
+    </script>
+</html>
